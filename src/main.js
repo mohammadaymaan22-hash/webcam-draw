@@ -8,6 +8,7 @@ import { initHandTracker, startDetectionLoop } from './handTracker.js';
 import { drawLandmarks } from './landmarkRenderer.js';
 import { setTipPosition, tipPositions } from './drawingState.js';
 import { drawSegment } from './drawingRenderer.js';
+import { detectGesture } from './gestureDetector.js';
 
 const INDEX_FINGERTIP = 8;
 
@@ -45,14 +46,16 @@ async function main() {
 
     // Draw line segments for each detected hand
     hands.forEach((hand, i) => {
-      const cur = tipPositions.get(i);
-      const prev = prevTip.get(i);
+      const cur     = tipPositions.get(i);
+      const prev    = prevTip.get(i);
+      const gesture = detectGesture(hand);
 
-      if (cur && prev) {
+      if (gesture === 'draw' && cur && prev) {
         drawSegment(drawCtx, prev, cur);
       }
 
-      prevTip.set(i, cur ? { ...cur } : null);
+      // Only carry prev forward when drawing — avoids jump on pen-down
+      prevTip.set(i, gesture === 'draw' ? { ...cur } : null);
     });
 
     drawLandmarks(landmarkCanvas, hands);
