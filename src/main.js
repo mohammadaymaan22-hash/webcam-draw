@@ -31,8 +31,35 @@ async function main() {
 
   const drawCtx   = drawingCanvas.getContext('2d');
   const hintEl    = document.getElementById('gesture-hint');
-  const CLEAR_HOLD_MS = 1500; // hold open palm this long to clear
-  let   clearHoldStart = null; // timestamp when open_palm gesture started
+  const CLEAR_HOLD_MS = 1500;
+  let   clearHoldStart = null;
+
+  // Brush config — passed to drawSegment each frame
+  const brush = { color: '#ff4d6d', lineWidth: 4, lineCap: 'round', lineJoin: 'round' };
+
+  // Color swatches
+  document.querySelectorAll('.swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      brush.color = btn.dataset.color;
+    });
+  });
+
+  // Custom color picker
+  const customColorEl = document.getElementById('custom-color');
+  customColorEl.addEventListener('input', () => {
+    document.querySelectorAll('.swatch').forEach(b => b.classList.remove('active'));
+    brush.color = customColorEl.value;
+  });
+
+  // Brush size slider
+  const sizeSlider = document.getElementById('brush-size');
+  const sizeVal    = document.getElementById('size-val');
+  sizeSlider.addEventListener('input', () => {
+    brush.lineWidth = Number(sizeSlider.value);
+    sizeVal.textContent = sizeSlider.value;
+  });
 
   await initHandTracker();
 
@@ -59,7 +86,7 @@ async function main() {
       const gesture = detectGesture(hand);
 
       if (gesture === 'draw' && cur && prev) {
-        drawSegment(drawCtx, prev, cur);
+        drawSegment(drawCtx, prev, cur, brush);
       }
 
       // Only carry prev forward when drawing — avoids jump on pen-down

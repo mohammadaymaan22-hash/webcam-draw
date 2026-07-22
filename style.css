@@ -75,3 +75,38 @@ body {
   background: #e63946;
   color: #fff;
 }
+
+/* Step 8 */
+#color-swatches {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+.swatch:hover  { transform: scale(1.15); }
+.swatch.active { border-color: #fff; transform: scale(1.2); }
+
+#custom-color {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+#size-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ccc;
+}
+#brush-size { width: 100px; cursor: pointer; }

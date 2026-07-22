@@ -18,7 +18,18 @@
     </div>
     <div id="controls">
       <div id="gesture-hint">✋ Open palm to clear</div>
-      <!-- Step 8: color + brush size go here -->
+      <div id="color-swatches">
+        <button class="swatch active" data-color="#ff4d6d" style="background:#ff4d6d"></button>
+        <button class="swatch" data-color="#ffd60a" style="background:#ffd60a"></button>
+        <button class="swatch" data-color="#06d6a0" style="background:#06d6a0"></button>
+        <button class="swatch" data-color="#4cc9f0" style="background:#4cc9f0"></button>
+        <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+        <input type="color" id="custom-color" title="Custom color" value="#ff4d6d" />
+      </div>
+      <label id="size-label">
+        Size <span id="size-val">4</span>px
+        <input type="range" id="brush-size" min="1" max="40" value="4" />
+      </label>
     </div>
   </div>
 
