@@ -7,6 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Pickr (Modern Custom Color Picker) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -33,8 +38,7 @@
           <button class="swatch" data-color="#06d6a0" style="background:#06d6a0"></button>
           <button class="swatch" data-color="#4cc9f0" style="background:#4cc9f0"></button>
           <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
-          <div class="custom-color-wrapper">
-            <input type="color" id="custom-color" title="Custom color" value="#ff4d6d" />
+          <div class="custom-color-wrapper" id="custom-color-container" title="Custom color">
             <div class="custom-color-icon">+</div>
           </div>
         </div>

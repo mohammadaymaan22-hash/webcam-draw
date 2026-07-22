@@ -86,11 +86,29 @@ async function main() {
     });
   });
 
-  // Custom color picker
-  const customColorEl = document.getElementById('custom-color');
-  customColorEl.addEventListener('input', () => {
+  // Custom color picker (Pickr)
+  const pickr = Pickr.create({
+    el: '#custom-color-container',
+    theme: 'nano', // 'classic' or 'monolith', or 'nano'
+    default: brush.color,
+    swatches: null,
+    components: {
+      preview: true,
+      opacity: false,
+      hue: true,
+      interaction: {
+        hex: true,
+        rgba: true,
+        input: true,
+        save: true
+      }
+    }
+  });
+
+  pickr.on('save', (color) => {
     document.querySelectorAll('.swatch').forEach(b => b.classList.remove('active'));
-    brush.color = customColorEl.value;
+    brush.color = color.toHEXA().toString();
+    pickr.hide();
   });
 
   // Brush size slider
