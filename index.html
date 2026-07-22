@@ -4,32 +4,50 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Webcam Draw</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="app">
     <div id="canvas-container">
-      <!-- Step 1: webcam feed -->
       <video id="webcam" autoplay playsinline muted></video>
-      <!-- Step 2: landmark overlay canvas -->
       <canvas id="landmark-canvas"></canvas>
-      <!-- Step 4: persistent drawing canvas -->
       <canvas id="drawing-canvas"></canvas>
     </div>
-    <div id="controls">
-      <div id="gesture-hint">✋ Open palm to clear</div>
-      <div id="color-swatches">
-        <button class="swatch active" data-color="#ff4d6d" style="background:#ff4d6d"></button>
-        <button class="swatch" data-color="#ffd60a" style="background:#ffd60a"></button>
-        <button class="swatch" data-color="#06d6a0" style="background:#06d6a0"></button>
-        <button class="swatch" data-color="#4cc9f0" style="background:#4cc9f0"></button>
-        <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
-        <input type="color" id="custom-color" title="Custom color" value="#ff4d6d" />
+    
+    <div id="toolbar-wrapper">
+      <div id="controls" class="glass-panel">
+        <div class="control-group">
+          <div id="gesture-hint">
+            <span class="hint-icon">✋</span> Palm = clear <span class="divider">|</span> <span class="hint-icon">🤙</span> Pinky = undo
+          </div>
+        </div>
+        
+        <div class="divider-vertical"></div>
+        
+        <div class="control-group" id="color-swatches">
+          <button class="swatch active" data-color="#ff4d6d" style="background:#ff4d6d"></button>
+          <button class="swatch" data-color="#ffd60a" style="background:#ffd60a"></button>
+          <button class="swatch" data-color="#06d6a0" style="background:#06d6a0"></button>
+          <button class="swatch" data-color="#4cc9f0" style="background:#4cc9f0"></button>
+          <button class="swatch" data-color="#ffffff" style="background:#ffffff"></button>
+          <div class="custom-color-wrapper">
+            <input type="color" id="custom-color" title="Custom color" value="#ff4d6d" />
+            <div class="custom-color-icon">+</div>
+          </div>
+        </div>
+        
+        <div class="divider-vertical"></div>
+        
+        <div class="control-group">
+          <label id="size-label">
+            Size <span id="size-val">4</span>px
+            <input type="range" id="brush-size" min="1" max="40" value="4" />
+          </label>
+        </div>
       </div>
-      <label id="size-label">
-        Size <span id="size-val">4</span>px
-        <input type="range" id="brush-size" min="1" max="40" value="4" />
-      </label>
     </div>
   </div>
 
