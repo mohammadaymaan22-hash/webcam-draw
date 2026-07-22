@@ -62,15 +62,16 @@ body {
 }
 
 /* Steps 7+ controls */
-button {
+#gesture-hint {
   padding: 8px 18px;
-  border: none;
   border-radius: 6px;
-  background: #e63946;
-  color: #fff;
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s, color 0.2s;
 }
-button:hover { background: #c1121f; }
+#gesture-hint.clearing {
+  background: #e63946;
+  color: #fff;
+}

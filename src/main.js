@@ -29,14 +29,10 @@ async function main() {
   drawingCanvas.width   = videoEl.videoWidth;
   drawingCanvas.height  = videoEl.videoHeight;
 
-  const drawCtx = drawingCanvas.getContext('2d');
-
-  // Clear button
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    clearDrawingCanvas(drawingCanvas);
-    prevTip.clear();
-    smoothers.forEach(s => s.reset());
-  });
+  const drawCtx   = drawingCanvas.getContext('2d');
+  const hintEl    = document.getElementById('gesture-hint');
+  const CLEAR_HOLD_MS = 1500; // hold open palm this long to clear
+  let   clearHoldStart = null; // timestamp when open_palm gesture started
 
   await initHandTracker();
 
@@ -71,6 +67,28 @@ async function main() {
     });
 
     drawLandmarks(landmarkCanvas, hands);
+
+    // Hold-to-clear: open palm held for CLEAR_HOLD_MS
+    const anyPalm = hands.some((_, i) => detectGesture(hands[i]) === 'open_palm');
+    if (anyPalm) {
+      if (!clearHoldStart) clearHoldStart = performance.now();
+      const held = performance.now() - clearHoldStart;
+      const pct  = Math.min(100, (held / CLEAR_HOLD_MS) * 100).toFixed(0);
+      hintEl.textContent = `✋ Clearing… ${pct}%`;
+      hintEl.classList.add('clearing');
+      if (held >= CLEAR_HOLD_MS) {
+        clearDrawingCanvas(drawingCanvas);
+        prevTip.clear();
+        smoothers.forEach(s => s.reset());
+        clearHoldStart = null;
+        hintEl.textContent = '✋ Open palm to clear';
+        hintEl.classList.remove('clearing');
+      }
+    } else {
+      clearHoldStart = null;
+      hintEl.textContent = '✋ Open palm to clear';
+      hintEl.classList.remove('clearing');
+    }
   });
 }
 

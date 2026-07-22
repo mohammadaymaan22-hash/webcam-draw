@@ -13,6 +13,7 @@
 const LM = {
   THUMB_TIP: 4,  INDEX_MCP: 5,   // thumb extension uses distance
   INDEX_TIP: 8,  INDEX_PIP: 6,
+  MIDDLE_TIP: 12, MIDDLE_PIP: 10,
   RING_TIP: 16,  RING_PIP: 14,
   PINKY_TIP: 20, PINKY_PIP: 18,
 };
@@ -41,12 +42,14 @@ function isThumbExtended(landmarks) {
  * @returns {'draw' | 'hover' | 'none'}
  */
 export function detectGesture(landmarks) {
-  const indexUp = isExtended(landmarks, LM.INDEX_TIP, LM.INDEX_PIP);
-  const thumbUp = isThumbExtended(landmarks);
-  const ringUp  = isExtended(landmarks, LM.RING_TIP,  LM.RING_PIP);
-  const pinkyUp = isExtended(landmarks, LM.PINKY_TIP, LM.PINKY_PIP);
+  const indexUp  = isExtended(landmarks, LM.INDEX_TIP,  LM.INDEX_PIP);
+  const middleUp = isExtended(landmarks, LM.MIDDLE_TIP, LM.MIDDLE_PIP);
+  const ringUp   = isExtended(landmarks, LM.RING_TIP,   LM.RING_PIP);
+  const pinkyUp  = isExtended(landmarks, LM.PINKY_TIP,  LM.PINKY_PIP);
+  const thumbUp  = isThumbExtended(landmarks);
 
-  if (indexUp && thumbUp) return 'hover';               // thumb + index = pen up
-  if (indexUp && !ringUp && !pinkyUp) return 'draw';    // index only = pen down
+  if (indexUp && middleUp && ringUp && pinkyUp) return 'open_palm'; // clear (check first)
+  if (indexUp && thumbUp)  return 'hover';                          // pen up
+  if (indexUp && !ringUp && !pinkyUp) return 'draw';                // pen down
   return 'none';
 }
