@@ -30,3 +30,12 @@ body {
   flex-wrap: wrap;
   justify-content: center;
 }
+
+/* Step 1 */
+#webcam {
+  display: block;
+  width: 640px;
+  height: 480px;
+  transform: scaleX(-1); /* mirror for natural selfie feel */
+  border-radius: 8px;
+}
