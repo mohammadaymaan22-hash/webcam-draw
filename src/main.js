@@ -22,7 +22,7 @@ const prevTip    = new Map(); // Map<handIndex, {x,y}>
 const smoothers  = new Map(); // Map<handIndex, Smoother>
 
 // Gesture debounce: only commit a gesture after it's stable for N frames
-const DEBOUNCE_FRAMES = 5;
+const DEBOUNCE_FRAMES = 10;
 const gestureState = new Map(); // Map<handIndex, {candidate, count, stable}>
 
 function getStableGesture(handIndex, raw) {
@@ -81,6 +81,12 @@ async function main() {
   await initHandTracker();
 
   startDetectionLoop(videoEl, (hands) => {
+    // Compute stable gesture ONCE per hand per frame
+    const gestures = new Map();
+    hands.forEach((hand, i) => {
+      gestures.set(i, getStableGesture(i, detectGesture(hand)));
+    });
+
     // Update tip positions (with EMA smoothing)
     hands.forEach((hand, i) => {
       if (!smoothers.has(i)) smoothers.set(i, new Smoother(0.5));
@@ -101,20 +107,19 @@ async function main() {
     hands.forEach((hand, i) => {
       const cur     = tipPositions.get(i);
       const prev    = prevTip.get(i);
-      const gesture = getStableGesture(i, detectGesture(hand));
+      const gesture = gestures.get(i);
 
       if (gesture === 'draw' && cur && prev) {
         drawSegment(drawCtx, prev, cur, brush);
       }
 
-      // Only carry prev forward when drawing — avoids jump on pen-down
       prevTip.set(i, gesture === 'draw' ? { ...cur } : null);
     });
 
     drawLandmarks(landmarkCanvas, hands);
 
     // Hold-to-clear: open palm held for CLEAR_HOLD_MS
-    const anyPalm = hands.some((hand, i) => getStableGesture(i, detectGesture(hand)) === 'open_palm');
+    const anyPalm = hands.some((_, i) => gestures.get(i) === 'open_palm');
     if (anyPalm) {
       if (!clearHoldStart) clearHoldStart = performance.now();
       const held = performance.now() - clearHoldStart;
