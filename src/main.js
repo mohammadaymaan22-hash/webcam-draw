@@ -21,19 +21,38 @@ const drawingCanvas  = document.getElementById('drawing-canvas');
 const prevTip    = new Map(); // Map<handIndex, {x,y}>
 const smoothers  = new Map(); // Map<handIndex, Smoother>
 
-// Gesture debounce: only commit a gesture after it's stable for N frames
-const DEBOUNCE_FRAMES = 10;
-const gestureState = new Map(); // Map<handIndex, {candidate, count, stable}>
+// Gesture debounce
+// ENTER: frames needed to start a new gesture
+// EXIT:  frames of a different gesture needed to leave current stable gesture
+//        (higher = more tolerant of single-frame dropouts during fast movement)
+const ENTER_FRAMES = 4;
+const EXIT_FRAMES  = 6;
+const gestureState = new Map(); // Map<handIndex, {stable, pending, count}>
 
 function getStableGesture(handIndex, raw) {
-  const s = gestureState.get(handIndex) ?? { candidate: raw, count: 0, stable: 'none' };
-  if (raw === s.candidate) {
-    s.count++;
-    if (s.count >= DEBOUNCE_FRAMES) s.stable = raw;
+  const s = gestureState.get(handIndex) ?? { stable: 'none', pending: null, count: 0 };
+
+  if (raw === s.stable) {
+    // Reinforce current stable state — wipe any pending transition
+    s.pending = null;
+    s.count   = 0;
   } else {
-    s.candidate = raw;
-    s.count = 1;
+    // Something different from stable is being seen
+    if (raw === s.pending) {
+      s.count++;
+      const threshold = s.stable === 'none' ? ENTER_FRAMES : EXIT_FRAMES;
+      if (s.count >= threshold) {
+        s.stable  = raw;
+        s.pending = null;
+        s.count   = 0;
+      }
+    } else {
+      // New candidate — start fresh
+      s.pending = raw;
+      s.count   = 1;
+    }
   }
+
   gestureState.set(handIndex, s);
   return s.stable;
 }
