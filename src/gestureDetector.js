@@ -11,23 +11,24 @@
  */
 
 const LM = {
-  THUMB_TIP: 4,  INDEX_MCP: 5,   // thumb extension uses distance
-  INDEX_TIP: 8,  INDEX_PIP: 6,
-  MIDDLE_TIP: 12, MIDDLE_PIP: 10,
-  RING_TIP: 16,  RING_PIP: 14,
-  PINKY_TIP: 20, PINKY_PIP: 18,
+  WRIST: 0,
+  THUMB_TIP: 4,  INDEX_MCP: 5,
+  INDEX_TIP: 8,  INDEX_MCP_REF: 5,  // use MCP (knuckle) — stays in frame near bottom
+  MIDDLE_TIP: 12, MIDDLE_MCP: 9,
+  RING_TIP: 16,  RING_MCP: 13,
+  PINKY_TIP: 20, PINKY_MCP: 17,
 };
 
 /**
- * A finger is "extended" when its tip is above its PIP joint.
+ * A finger is extended when its tip is above its MCP (base knuckle).
+ * Using MCP instead of PIP because MCP stays in frame longer near frame edges.
  */
-function isExtended(landmarks, tipIdx, pipIdx) {
-  return landmarks[tipIdx].y < landmarks[pipIdx].y;
+function isExtended(landmarks, tipIdx, mcpIdx) {
+  return landmarks[tipIdx].y < landmarks[mcpIdx].y;
 }
 
 /**
  * Thumb is extended when its tip is far from the index finger's MCP joint.
- * Distance threshold works better than Y-axis for the thumb's lateral motion.
  */
 function isThumbExtended(landmarks) {
   const tip = landmarks[LM.THUMB_TIP];
@@ -39,17 +40,20 @@ function isThumbExtended(landmarks) {
 
 /**
  * @param {Array<{x,y,z}>} landmarks  21 landmarks for one hand
- * @returns {'draw' | 'hover' | 'none'}
+ * @returns {'draw' | 'hover' | 'open_palm' | 'none'}
  */
 export function detectGesture(landmarks) {
-  const indexUp  = isExtended(landmarks, LM.INDEX_TIP,  LM.INDEX_PIP);
-  const middleUp = isExtended(landmarks, LM.MIDDLE_TIP, LM.MIDDLE_PIP);
-  const ringUp   = isExtended(landmarks, LM.RING_TIP,   LM.RING_PIP);
-  const pinkyUp  = isExtended(landmarks, LM.PINKY_TIP,  LM.PINKY_PIP);
+  const wristInFrame = landmarks[LM.WRIST].y < 0.80; // hand not cropped at bottom
+
+  const indexUp  = isExtended(landmarks, LM.INDEX_TIP,  LM.INDEX_MCP_REF);
+  const middleUp = isExtended(landmarks, LM.MIDDLE_TIP, LM.MIDDLE_MCP);
+  const ringUp   = isExtended(landmarks, LM.RING_TIP,   LM.RING_MCP);
+  const pinkyUp  = isExtended(landmarks, LM.PINKY_TIP,  LM.PINKY_MCP);
   const thumbUp  = isThumbExtended(landmarks);
 
-  if (indexUp && middleUp && ringUp && pinkyUp) return 'open_palm';
-  if (indexUp && thumbUp)                       return 'hover';
-  if (indexUp)                                  return 'draw'; // open_palm/hover already caught
+  // open_palm only valid when whole hand is in frame
+  if (wristInFrame && indexUp && middleUp && ringUp && pinkyUp) return 'open_palm';
+  if (indexUp && thumbUp) return 'hover';
+  if (indexUp)            return 'draw';
   return 'none';
 }
