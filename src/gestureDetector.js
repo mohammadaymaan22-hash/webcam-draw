@@ -51,9 +51,9 @@ export function detectGesture(landmarks) {
   const pinkyUp  = isExtended(landmarks, LM.PINKY_TIP,  LM.PINKY_MCP);
   const thumbUp  = isThumbExtended(landmarks);
 
-  // open_palm only valid when whole hand is in frame
   if (wristInFrame && indexUp && middleUp && ringUp && pinkyUp) return 'open_palm';
   if (indexUp && thumbUp) return 'hover';
   if (indexUp)            return 'draw';
+  if (pinkyUp && !indexUp) return 'undo'; // pinky only = undo
   return 'none';
 }

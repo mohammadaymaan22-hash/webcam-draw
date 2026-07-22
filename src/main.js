@@ -6,8 +6,9 @@
 import { startCamera } from './camera.js';
 import { initHandTracker, startDetectionLoop } from './handTracker.js';
 import { drawLandmarks } from './landmarkRenderer.js';
-import { setTipPosition, tipPositions } from './drawingState.js';
-import { drawSegment, clearDrawingCanvas } from './drawingRenderer.js';
+import { setTipPosition, tipPositions, completedStrokes,
+         beginStroke, addStrokePoint, endStroke, undoLastStroke, clearAll } from './drawingState.js';
+import { drawSegment, clearDrawingCanvas, redrawStrokes } from './drawingRenderer.js';
 import { detectGesture } from './gestureDetector.js';
 import { Smoother } from './smoother.js';
 
@@ -18,8 +19,10 @@ const landmarkCanvas = document.getElementById('landmark-canvas');
 const drawingCanvas  = document.getElementById('drawing-canvas');
 
 // Track previous tip position per hand for line segments
-const prevTip    = new Map(); // Map<handIndex, {x,y}>
-const smoothers  = new Map(); // Map<handIndex, Smoother>
+const prevTip      = new Map();
+const smoothers    = new Map();
+const prevGestures = new Map(); // track gesture transitions for stroke begin/end
+let   undoCooldown = false;     // prevents rapid-fire undo
 
 // Gesture debounce
 // ENTER: frames needed to start a new gesture
@@ -67,6 +70,7 @@ async function main() {
 
   const drawCtx   = drawingCanvas.getContext('2d');
   const hintEl    = document.getElementById('gesture-hint');
+  hintEl.textContent = '✋ Palm = clear  |  🤙 Pinky = undo';
   const CLEAR_HOLD_MS = 1500;
   let   clearHoldStart = null;
 
@@ -122,20 +126,36 @@ async function main() {
       }
     }
 
-    // Draw line segments for each detected hand
+    // Draw line segments + track stroke lifecycle
     hands.forEach((hand, i) => {
-      const cur     = tipPositions.get(i);
-      const prev    = prevTip.get(i);
-      const gesture = gestures.get(i);
+      const cur      = tipPositions.get(i);
+      const prev     = prevTip.get(i);
+      const gesture  = gestures.get(i);
+      const prevG    = prevGestures.get(i) ?? 'none';
+
+      // Stroke transitions
+      if (gesture === 'draw' && prevG !== 'draw') beginStroke(i, brush);
+      if (gesture !== 'draw' && prevG === 'draw') endStroke(i);
 
       if (gesture === 'draw' && cur && prev) {
         drawSegment(drawCtx, prev, cur, brush);
+        addStrokePoint(i, cur);
       }
 
       prevTip.set(i, gesture === 'draw' ? { ...cur } : null);
+      prevGestures.set(i, gesture);
     });
 
     drawLandmarks(landmarkCanvas, hands);
+
+    // Undo gesture: pinky only up
+    const anyUndo = hands.some((_, i) => gestures.get(i) === 'undo');
+    if (anyUndo && !undoCooldown) {
+      undoLastStroke();
+      redrawStrokes(drawingCanvas, completedStrokes);
+      undoCooldown = true;
+      setTimeout(() => { undoCooldown = false; }, 800);
+    }
 
     // Hold-to-clear: open palm held for CLEAR_HOLD_MS
     const anyPalm = hands.some((_, i) => gestures.get(i) === 'open_palm');
@@ -147,6 +167,7 @@ async function main() {
       hintEl.classList.add('clearing');
       if (held >= CLEAR_HOLD_MS) {
         clearDrawingCanvas(drawingCanvas);
+        clearAll();
         prevTip.clear();
         smoothers.forEach(s => s.reset());
         clearHoldStart = null;
