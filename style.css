@@ -205,26 +205,20 @@ body {
   font-size: 18px;
   line-height: 1;
   pointer-events: none;
-  position: absolute;
-  z-index: 1;
 }
 
 .custom-color-wrapper:hover .custom-color-icon {
   color: #fff;
 }
 
-/* Pickr overrides */
-.pickr {
+#custom-color {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-}
-.pcr-button {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 50% !important;
-  opacity: 0 !important; /* Hide button but keep it clickable over the + icon */
-  cursor: pointer !important;
+  top: 0;
+  left: 0;
+  opacity: 0; /* visually hidden but clickable */
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 /* Brush Size Slider */
