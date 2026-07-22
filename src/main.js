@@ -21,6 +21,23 @@ const drawingCanvas  = document.getElementById('drawing-canvas');
 const prevTip    = new Map(); // Map<handIndex, {x,y}>
 const smoothers  = new Map(); // Map<handIndex, Smoother>
 
+// Gesture debounce: only commit a gesture after it's stable for N frames
+const DEBOUNCE_FRAMES = 5;
+const gestureState = new Map(); // Map<handIndex, {candidate, count, stable}>
+
+function getStableGesture(handIndex, raw) {
+  const s = gestureState.get(handIndex) ?? { candidate: raw, count: 0, stable: 'none' };
+  if (raw === s.candidate) {
+    s.count++;
+    if (s.count >= DEBOUNCE_FRAMES) s.stable = raw;
+  } else {
+    s.candidate = raw;
+    s.count = 1;
+  }
+  gestureState.set(handIndex, s);
+  return s.stable;
+}
+
 async function main() {
   await startCamera(videoEl);
 
@@ -76,6 +93,7 @@ async function main() {
         setTipPosition(i, null);
         prevTip.delete(i);
         smoothers.get(i)?.reset();
+        gestureState.delete(i);
       }
     }
 
@@ -83,7 +101,7 @@ async function main() {
     hands.forEach((hand, i) => {
       const cur     = tipPositions.get(i);
       const prev    = prevTip.get(i);
-      const gesture = detectGesture(hand);
+      const gesture = getStableGesture(i, detectGesture(hand));
 
       if (gesture === 'draw' && cur && prev) {
         drawSegment(drawCtx, prev, cur, brush);
@@ -96,7 +114,7 @@ async function main() {
     drawLandmarks(landmarkCanvas, hands);
 
     // Hold-to-clear: open palm held for CLEAR_HOLD_MS
-    const anyPalm = hands.some((_, i) => detectGesture(hands[i]) === 'open_palm');
+    const anyPalm = hands.some((hand, i) => getStableGesture(i, detectGesture(hand)) === 'open_palm');
     if (anyPalm) {
       if (!clearHoldStart) clearHoldStart = performance.now();
       const held = performance.now() - clearHoldStart;

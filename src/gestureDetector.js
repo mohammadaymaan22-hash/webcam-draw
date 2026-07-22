@@ -48,8 +48,8 @@ export function detectGesture(landmarks) {
   const pinkyUp  = isExtended(landmarks, LM.PINKY_TIP,  LM.PINKY_PIP);
   const thumbUp  = isThumbExtended(landmarks);
 
-  if (indexUp && middleUp && ringUp && pinkyUp) return 'open_palm'; // clear (check first)
-  if (indexUp && thumbUp)  return 'hover';                          // pen up
-  if (indexUp && !ringUp && !pinkyUp) return 'draw';                // pen down
+  if (indexUp && middleUp && ringUp && pinkyUp) return 'open_palm';
+  if (indexUp && thumbUp)                       return 'hover';
+  if (indexUp)                                  return 'draw'; // open_palm/hover already caught
   return 'none';
 }
