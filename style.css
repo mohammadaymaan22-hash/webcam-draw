@@ -49,3 +49,13 @@ body {
   transform: scaleX(-1); /* mirror to match video */
   pointer-events: none;
 }
+
+/* Step 4 */
+#drawing-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 640px;
+  height: 480px;
+  transform: scaleX(-1); /* mirror to match video */
+  pointer-events: none;
+}
