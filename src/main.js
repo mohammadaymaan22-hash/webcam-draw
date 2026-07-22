@@ -7,7 +7,7 @@ import { startCamera } from './camera.js';
 import { initHandTracker, startDetectionLoop } from './handTracker.js';
 import { drawLandmarks } from './landmarkRenderer.js';
 import { setTipPosition, tipPositions } from './drawingState.js';
-import { drawSegment } from './drawingRenderer.js';
+import { drawSegment, clearDrawingCanvas } from './drawingRenderer.js';
 import { detectGesture } from './gestureDetector.js';
 import { Smoother } from './smoother.js';
 
@@ -30,6 +30,13 @@ async function main() {
   drawingCanvas.height  = videoEl.videoHeight;
 
   const drawCtx = drawingCanvas.getContext('2d');
+
+  // Clear button
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    clearDrawingCanvas(drawingCanvas);
+    prevTip.clear();
+    smoothers.forEach(s => s.reset());
+  });
 
   await initHandTracker();
 

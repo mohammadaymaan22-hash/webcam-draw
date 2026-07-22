@@ -60,3 +60,17 @@ body {
   transform: scaleX(-1);
   pointer-events: none;
 }
+
+/* Steps 7+ controls */
+button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 6px;
+  background: #e63946;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+button:hover { background: #c1121f; }
