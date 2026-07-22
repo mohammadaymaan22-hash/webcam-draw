@@ -107,10 +107,14 @@ async function main() {
     });
 
     // Update tip positions (with EMA smoothing)
+    // Y is remapped: only use top 75% of camera height so canvas bottom
+    // stays within the camera's field of view
+    const Y_MAX = 0.75;
     hands.forEach((hand, i) => {
       if (!smoothers.has(i)) smoothers.set(i, new Smoother(0.5));
       const raw = hand[INDEX_FINGERTIP];
-      const smoothed = smoothers.get(i).update({ x: raw.x, y: raw.y });
+      const remapped = { x: raw.x, y: Math.min(raw.y, Y_MAX) / Y_MAX };
+      const smoothed = smoothers.get(i).update(remapped);
       setTipPosition(i, smoothed);
     });
     for (const i of tipPositions.keys()) {

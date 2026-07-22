@@ -35,7 +35,7 @@ body {
 #webcam {
   display: block;
   width: auto;
-  height: 72vh;
+  height: 55vh;
   aspect-ratio: 16 / 9;
   transform: scaleX(-1);
   border-radius: 8px;
