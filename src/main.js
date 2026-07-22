@@ -4,11 +4,29 @@
  */
 
 import { startCamera } from './camera.js';
+import { initHandTracker, startDetectionLoop } from './handTracker.js';
+import { drawLandmarks } from './landmarkRenderer.js';
 
 const videoEl = document.getElementById('webcam');
+const landmarkCanvas = document.getElementById('landmark-canvas');
 
-startCamera(videoEl).catch((err) => {
-  console.error('Camera failed:', err);
-  alert('Could not access webcam. Make sure you allow camera permission and are on localhost or HTTPS.');
+async function main() {
+  await startCamera(videoEl);
+
+  // Match canvas resolution to video
+  landmarkCanvas.width = videoEl.videoWidth;
+  landmarkCanvas.height = videoEl.videoHeight;
+
+  await initHandTracker();
+
+  startDetectionLoop(videoEl, (hands) => {
+    drawLandmarks(landmarkCanvas, hands);
+  });
+}
+
+main().catch((err) => {
+  console.error(err);
+  alert('Error: ' + err.message);
 });
+
 

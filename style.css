@@ -39,3 +39,13 @@ body {
   transform: scaleX(-1); /* mirror for natural selfie feel */
   border-radius: 8px;
 }
+
+/* Step 2 */
+#landmark-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 640px;
+  height: 480px;
+  transform: scaleX(-1); /* mirror to match video */
+  pointer-events: none;
+}
