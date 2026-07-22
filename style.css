@@ -34,9 +34,9 @@ body {
 /* Step 1 */
 #webcam {
   display: block;
-  width: 640px;
-  height: 480px;
-  transform: scaleX(-1); /* mirror for natural selfie feel */
+  width: 1280px;
+  height: 720px;
+  transform: scaleX(-1);
   border-radius: 8px;
 }
 
@@ -44,9 +44,9 @@ body {
 #landmark-canvas {
   position: absolute;
   top: 0; left: 0;
-  width: 640px;
-  height: 480px;
-  transform: scaleX(-1); /* mirror to match video */
+  width: 1280px;
+  height: 720px;
+  transform: scaleX(-1);
   pointer-events: none;
 }
 
@@ -54,8 +54,8 @@ body {
 #drawing-canvas {
   position: absolute;
   top: 0; left: 0;
-  width: 640px;
-  height: 480px;
-  transform: scaleX(-1); /* mirror to match video */
+  width: 1280px;
+  height: 720px;
+  transform: scaleX(-1);
   pointer-events: none;
 }
