@@ -9,6 +9,7 @@ import { drawLandmarks } from './landmarkRenderer.js';
 import { setTipPosition, tipPositions } from './drawingState.js';
 import { drawSegment } from './drawingRenderer.js';
 import { detectGesture } from './gestureDetector.js';
+import { Smoother } from './smoother.js';
 
 const INDEX_FINGERTIP = 8;
 
@@ -17,7 +18,8 @@ const landmarkCanvas = document.getElementById('landmark-canvas');
 const drawingCanvas  = document.getElementById('drawing-canvas');
 
 // Track previous tip position per hand for line segments
-const prevTip = new Map(); // Map<handIndex, {x,y}>
+const prevTip    = new Map(); // Map<handIndex, {x,y}>
+const smoothers  = new Map(); // Map<handIndex, Smoother>
 
 async function main() {
   await startCamera(videoEl);
@@ -32,15 +34,18 @@ async function main() {
   await initHandTracker();
 
   startDetectionLoop(videoEl, (hands) => {
-    // Update tip positions
+    // Update tip positions (with EMA smoothing)
     hands.forEach((hand, i) => {
-      const tip = hand[INDEX_FINGERTIP];
-      setTipPosition(i, { x: tip.x, y: tip.y });
+      if (!smoothers.has(i)) smoothers.set(i, new Smoother(0.5));
+      const raw = hand[INDEX_FINGERTIP];
+      const smoothed = smoothers.get(i).update({ x: raw.x, y: raw.y });
+      setTipPosition(i, smoothed);
     });
     for (const i of tipPositions.keys()) {
       if (i >= hands.length) {
         setTipPosition(i, null);
         prevTip.delete(i);
+        smoothers.get(i)?.reset();
       }
     }
 
